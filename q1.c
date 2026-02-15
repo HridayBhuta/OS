@@ -4,14 +4,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
-#include <signal.h>
 #include <stdbool.h>
-
-volatile sig_atomic_t keep_running = 1;
-
-void handle_sigint(int sig) {
-    keep_running = 0;
-}
 
 void print_factors(int x) {
     printf("Child: Factors of %d are: ", x);
@@ -32,9 +25,6 @@ int main() {
 
     for (int i = 0; i < arr_size; i++) visited[i] = false;
 
-    // Register signal handler for Ctrl+C
-    signal(SIGINT, handle_sigint);
-
     printf("Enter n (n > 0): ");
     if (scanf("%d", &n) != 1 || n <= 0) {
         printf("Invalid input.\n");
@@ -54,14 +44,13 @@ int main() {
         return 1;
     }
 
-    if (pid > 0) { // Parent Process
-        close(pipefd[0]); // Close unused read end
+    if (pid > 0) {
+        close(pipefd[0]);
         srand(time(NULL));
 
-        while (keep_running && visited_count < arr_size) {
+        while (visited_count < arr_size) {
             int idx = rand() % arr_size;
             
-            // Mark as visited and increment count if it's the first time
             if (!visited[idx]) {
                 visited[idx] = true;
                 visited_count++;
@@ -76,7 +65,6 @@ int main() {
             sleep(x % n);
         }
 
-        // Send a sentinel value (-1) to tell the child to terminate
         int stop_signal = -1;
         write(pipefd[1], &stop_signal, sizeof(stop_signal));
         
@@ -84,14 +72,14 @@ int main() {
         wait(NULL); // Wait for child to finish
         printf("Parent: All numbers visited or interrupted. Exiting.\n");
 
-    } else { // Child Process
-        close(pipefd[1]); // Close unused write end
+    } 
+    else {
+        close(pipefd[1]);
         int received_x;
 
-        while (keep_running) {
-            // Read from pipe (blocks until data is available)
+        while (1) {
             if (read(pipefd[0], &received_x, sizeof(received_x)) > 0) {
-                if (received_x == -1) break; // Exit signal from parent
+                if (received_x == -1) break;
 
                 print_factors(received_x);
                 
