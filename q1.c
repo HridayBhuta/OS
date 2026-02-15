@@ -69,7 +69,7 @@ int main() {
         write(pipefd[1], &stop_signal, sizeof(stop_signal));
         
         close(pipefd[1]);
-        wait(NULL); // Wait for child to finish
+        wait(NULL);
         printf("Parent: All numbers visited or interrupted. Exiting.\n");
 
     } 
