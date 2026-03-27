@@ -1,0 +1,8 @@
+sudo sysctl kernel.sched_rr_timeslice_ms=2
+sudo sysctl kernel.sched_rr_timeslice_ms=5
+sudo sysctl kernel.sched_rr_timeslice_ms=20
+sudo sysctl kernel.sched_rr_timeslice_ms=100
+sudo sysctl kernel.sched_rr_timeslice_ms=200
+
+sudo taskset -c 0 chrt -r 20 ./Q2_A
+sudo taskset -c 0 chrt -r 20 ./Q2_B
